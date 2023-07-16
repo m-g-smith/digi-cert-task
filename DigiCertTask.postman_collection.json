@@ -1,0 +1,302 @@
+{
+	"info": {
+		"_postman_id": "f4584a00-0dd6-4c32-a996-5c2530b1f961",
+		"name": "DigiCertTask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.clear()\r",
+							"var responseData = pm.response.json();\r",
+							"var requestData = JSON.parse(pm.request.body)\r",
+							"\r",
+							"pm.test(\"Creation Test\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(responseData.id).not.eql(null);\r",
+							"    pm.expect(responseData.firstName).to.eql(requestData.firstName);\r",
+							"    pm.expect(responseData.lastName).to.eql(requestData.lastName);\r",
+							"    pm.expect(responseData.email).to.eql(requestData.email);\r",
+							"});\r",
+							"\r",
+							"pm.collectionVariables.set(\"userId\", responseData.id);\r",
+							"pm.collectionVariables.set(\"firstName\", responseData.firstName);\r",
+							"pm.collectionVariables.set(\"lastName\", responseData.lastName);\r",
+							"pm.collectionVariables.set(\"email\", responseData.email);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"{{$randomUserName}}\",\r\n    \"lastName\": \"{{$randomUserName}}\",\r\n    \"email\": \"{{$randomEmail}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:23232/users",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get User\", function () {\r",
+							"    var responseData = pm.response.json();\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(responseData.id).to.eql(pm.collectionVariables.get(\"userId\"));\r",
+							"    pm.expect(responseData.firstName).to.eql(pm.collectionVariables.get(\"firstName\"));\r",
+							"    pm.expect(responseData.lastName).to.eql(pm.collectionVariables.get(\"lastName\"));\r",
+							"    pm.expect(responseData.email).to.eql(pm.collectionVariables.get(\"email\"));\r",
+							"});\r",
+							"\r",
+							"if (pm.collectionVariables.get(\"nextRequest\") != null) {\r",
+							"    postman.setNextRequest(pm.collectionVariables.get(\"nextRequest\"))\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:23232/users/{{userId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Users\", function () {\r",
+							"    var responseData = pm.response.json().items;\r",
+							"    pm.expect(responseData.length).to.be.above(0)\r",
+							"    for (let i = 0; i < responseData.length; i++) {\r",
+							"        if (responseData[i].id === pm.collectionVariables.get(\"userId\")) {\r",
+							"            pm.expect(responseData[i].firstName).to.eql(pm.collectionVariables.get(\"firstName\"));\r",
+							"            pm.expect(responseData[i].lastName).to.eql(pm.collectionVariables.get(\"lastName\"));\r",
+							"            pm.expect(responseData[i].email).to.eql(pm.collectionVariables.get(\"email\"));\r",
+							"        }\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:23232/users",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = pm.response.json();\r",
+							"var requestData = JSON.parse(pm.request.body)\r",
+							"pm.test(\"Update Test\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(responseData.id).to.eql(pm.collectionVariables.get(\"userId\"));\r",
+							"    pm.expect(responseData.firstName).to.eql(requestData.firstName);\r",
+							"    pm.expect(responseData.lastName).to.eql(requestData.lastName);\r",
+							"    pm.expect(responseData.email).to.eql(requestData.email);\r",
+							"});\r",
+							"pm.collectionVariables.set(\"userId\", responseData.id);\r",
+							"pm.collectionVariables.set(\"firstName\", responseData.firstName);\r",
+							"pm.collectionVariables.set(\"lastName\", responseData.lastName);\r",
+							"pm.collectionVariables.set(\"email\", responseData.email);\r",
+							"pm.collectionVariables.set('nextRequest', \"Delete User\")\r",
+							"//Double check the DB is updated\r",
+							"postman.setNextRequest(\"Get User\")"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"{{$ramdomUsername}}\",\r\n    \"lastName\": \"{{$ramdomUsername}}\",\r\n    \"email\": \"{{$randomEmail}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:23232/users/{{userId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete User\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:23232/users/{{userId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User - Does not Exist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get No User\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:23232/users/{{userId}}",
+					"host": [
+						"localhost"
+					],
+					"port": "23232",
+					"path": [
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "email",
+			"value": "Jose79@yahoo.com"
+		},
+		{
+			"key": "firstName",
+			"value": "{{$ramdomUsername}}"
+		},
+		{
+			"key": "lastName",
+			"value": "{{$ramdomUsername}}"
+		},
+		{
+			"key": "userId",
+			"value": 406
+		},
+		{
+			"key": "nextRequest",
+			"value": "Delete User"
+		}
+	]
+}

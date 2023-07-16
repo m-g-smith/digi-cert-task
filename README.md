@@ -12,4 +12,8 @@ If the image was not created you can run ```mvn docker:build```, which should ha
 
 You can then run ```docker compose up```. This should first start up the mysql database and then the spring boot app.
 
-At this point the application should be available on port 23232 for use.
+At this point the application should be available on port 23232 for use. There is a postman collection that can be used to test the application
+
+To tear down run ```docker compose down```
+
+Please note that the database is not using permanent storage. i.e. if the container is shut down all data is lost.
